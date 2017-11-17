@@ -45,9 +45,9 @@
         left: 50
     };
 
-    var width = 600 - margin.left - margin.right;
+    var width = 900 - margin.left - margin.right;
 
-    var height = 400 - margin.top - margin.bottom;
+    var height = 600 - margin.top - margin.bottom;
 
     // Set the ranges
     var x = d3.scale.linear().range([0, width]);
@@ -99,9 +99,7 @@
         x.domain(d3.extent(data, function (d) {
             return d.date;
         }));
-        y.domain([0, d3.max(data, function (d) {
-            return d.occupati;
-        })]);
+        y.domain([0, 100]);
 
         // Add the valueline path.
         svg.append("path")
