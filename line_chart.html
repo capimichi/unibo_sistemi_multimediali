@@ -9,6 +9,20 @@
         background-color: #eee;
     }
 
+    path {
+        stroke: steelblue;
+        stroke-width: 2;
+        fill: none;
+    }
+
+    .axis path,
+    .axis line {
+        fill: none;
+        stroke: grey;
+        stroke-width: 1;
+        shape-rendering: crispEdges;
+    }
+
 </style>
 <body>
 
@@ -36,7 +50,8 @@
     var height = 400 - margin.top - margin.bottom;
 
     // Set the ranges
-    var x = d3.time.scale().range([0, width]);
+    var x = d3.scale.linear().range([0, width]);
+
     var y = d3.scale.linear().range([height, 0]);
 
     // Define the axes
