@@ -6,13 +6,15 @@
 
     body {
         font-family: 'Barlow Condensed', sans-serif;
+        background: #eee;
     }
 
     #chart-container {
         width: 900px;
         height: 600px;
         margin: 100px auto 0;
-        background-color: #CCE6F6;
+        background-color: #fff;
+        box-shadow: 0 2px 1px rgba(0, 0, 0, .2);
     }
 
     path {
@@ -73,8 +75,14 @@
     var y = d3.scale.linear().range([height, 0]);
 
     // Define the axes
-    var xAxis = d3.svg.axis().scale(x)
-        .orient("bottom").ticks(5);
+    var xAxis = d3
+        .svg
+        .axis()
+        .scale(x)
+        .orient("bottom")
+        .ticks(5)
+        .tickFormat(d3.format("d"))
+        .tickSubdivide(0);
 
     var yAxis = d3.svg.axis().scale(y)
         .orient("left").ticks(20);
@@ -114,9 +122,15 @@
 //        });
 
         // Scale the range of the data
-        x.domain(d3.extent(data, function (d) {
-            return d.date;
-        }));
+        x.domain([
+            d3.min(data, function (d) {
+                return d.date;
+            }),
+            d3.max(data, function (d) {
+                return d.date;
+            })
+        ]);
+
         y.domain([0, 100]);
 
         // Add the valueline path.
