@@ -1,0 +1,63 @@
+@import url('https://fonts.googleapis.com/css?family=Barlow+Condensed');
+
+body {
+    font-family: 'Barlow Condensed', sans-serif;
+    background: #eee;
+}
+
+#chart-container {
+    width: 900px;
+    height: 600px;
+    margin: 100px auto 0;
+    background-color: #fff;
+    box-shadow: 0 2px 1px rgba(0, 0, 0, .2);
+}
+
+path {
+    stroke-width: 2;
+    fill: none;
+}
+
+.axis path,
+.axis line {
+    fill: none;
+    stroke: grey;
+    stroke-width: 1;
+    shape-rendering: crispEdges;
+}
+
+path.occupati {
+    stroke: #F2693A;
+}
+
+path.non_occupati {
+    stroke: #F2C23A;
+}
+
+.axis {
+    stroke: #464646;
+}
+
+.circle.occupati {
+    stroke: #D84512;
+    fill: #D84512;
+}
+
+.circle.non_occupati {
+    stroke: #D88012;
+    fill: #D88012;
+}
+
+.circle.hover {
+    stroke-width: 7px;
+}
+
+div.tooltip {
+    position: absolute;
+    text-align: left;
+    padding: 10px;
+    font: 12px sans-serif;
+    background: #F2F2F2;
+    border: 1px solid #eee;
+    pointer-events: none;
+}
