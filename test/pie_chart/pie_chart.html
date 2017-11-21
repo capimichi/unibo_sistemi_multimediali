@@ -12,7 +12,6 @@
 }
 
 </style>
-<body>
 <svg width="960" height="500"></svg>
 <script src="https://d3js.org/d3.v4.min.js"></script>
 <script>
@@ -30,11 +29,11 @@ var pie = d3.pie()
     .value(function(d) { return d.valore; });
 
 var path = d3.arc()
-    .outerRadius(radius - 10)
+    .outerRadius(radius)
     .innerRadius(0);
 
 var label = d3.arc()
-    .outerRadius(radius - 40)
+    .outerRadius(radius - 80)
     .innerRadius(radius - 40);
 
 d3.csv("CSV_file.csv", function(d) {
@@ -59,4 +58,3 @@ d3.csv("CSV_file.csv", function(d) {
 });
 
 </script>
-</body>
