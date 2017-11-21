@@ -21,6 +21,48 @@ var tooltip = d3.select("body")
 
 var cd = window.cd || {};
 
+cd.fetchLines = function (data) {
+
+    var lines = {};
+
+    data.forEach(function (row) {
+
+        var i = 0;
+
+        var x = null;
+
+        for (var key in row) {
+
+            var field = row[key];
+
+            if (i === 0) {
+
+                x = field;
+
+            } else {
+
+                var point = {
+                    x: x,
+                    y: field
+                };
+
+                if (typeof lines[key] === 'undefined') {
+                    lines[key] = [];
+                }
+
+                lines[key].push(point);
+
+            }
+
+            i++;
+
+        }
+
+    });
+
+    return lines;
+};
+
 cd.openOccupazioneNonStoricoGraph = function () {
 
     var x = d3.scale
@@ -74,6 +116,9 @@ cd.openOccupazioneNonStoricoGraph = function () {
 
         y.domain([0, 100]);
 
+        var lines = cd.fetchLines(data);
+
+        console.log(lines);
 
         var occupatiLineData = [];
         var nonOccupatiLineData = [];
