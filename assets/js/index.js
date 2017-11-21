@@ -21,47 +21,39 @@ var tooltip = d3.select("body")
 
 var cd = window.cd || {};
 
+/**
+ * Fetch lines from csv
+ *
+ * @param data
+ * @returns {{}}
+ */
 cd.fetchLines = function (data) {
-
     var lines = {};
-
     data.forEach(function (row) {
-
         var i = 0;
-
         var x = null;
-
         for (var key in row) {
-
             var field = row[key];
-
             if (i === 0) {
-
                 x = field;
-
             } else {
-
                 var point = {
                     x: x,
                     y: field
                 };
-
                 if (typeof lines[key] === 'undefined') {
                     lines[key] = [];
                 }
-
                 lines[key].push(point);
-
             }
-
             i++;
-
         }
-
     });
-
     return lines;
 };
+
+
+
 
 cd.openOccupazioneNonStoricoGraph = function () {
 
@@ -118,55 +110,26 @@ cd.openOccupazioneNonStoricoGraph = function () {
 
         var lines = cd.fetchLines(data);
 
-        console.log(lines);
+        for (var key in lines) {
 
-        var occupatiLineData = [];
-        var nonOccupatiLineData = [];
+            var line = lines[key];
 
-        data.forEach(function (p1, p2, p3) {
-            occupatiLineData.push({
-                x: p1.date,
-                y: p1.occupati
-            });
-            nonOccupatiLineData.push({
-                x: p1.date,
-                y: p1.non_occupati
-            });
-        });
+            svg.append("path")
+                .attr("class", "line " + key)
+                .attr("d", drawLine(line));
 
-        svg.append("path")
-            .attr("class", "line occupati")
-            .attr("d", drawLine(occupatiLineData));
 
-        svg.append("path")
-            .attr("class", "line non_occupati")
-            .attr("d", drawLine(nonOccupatiLineData));
-
-        svg.append("g")
-            .attr("class", "x axis")
-            .attr("transform", "translate(0," + height + ")")
-            .call(xAxis);
-
-        svg.append("g")
-            .attr("class", "y axis")
-            .call(yAxis);
-
-        var statuses = Object.keys(data[0]);
-
-        statuses.shift();
-
-        statuses.forEach(function (p1, p2, p3) {
             svg.selectAll("dot")
-                .data(data)
+                .data(line)
                 .enter()
                 .append("circle")
-                .attr("class", "circle " + p1)
+                .attr("class", "circle " + key)
                 .attr("r", 5)
                 .attr("cx", function (d) {
-                    return x(d.date);
+                    return x(d.x);
                 })
                 .attr("cy", function (d) {
-                    return y(d[p1]);
+                    return y(d.y);
                 })
                 .on("click", function (d) {
                     console.log(d);
@@ -175,8 +138,8 @@ cd.openOccupazioneNonStoricoGraph = function () {
                         .style("opacity", .9)
                         .style("left", (d3.event.pageX) + "px")
                         .style("top", (d3.event.pageY) + "px");
-                    tooltip.selectAll(".year").text(d.date);
-                    tooltip.selectAll(".status").text(p1);
+                    tooltip.selectAll(".year").text(d.x);
+                    tooltip.selectAll(".status").text(key);
                 })
                 .on("mousehover", function (d) {
                     var dot = d3.select(this);
@@ -186,7 +149,16 @@ cd.openOccupazioneNonStoricoGraph = function () {
                     var dot = d3.select(this);
                     dot.classed("hover", false);
                 });
-        });
+        }
+
+        svg.append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(0," + height + ")")
+            .call(xAxis);
+
+        svg.append("g")
+            .attr("class", "y axis")
+            .call(yAxis);
     });
 };
 
