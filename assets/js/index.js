@@ -1,25 +1,61 @@
-var chartContainer = d3.select("#chart-container");
+var cd = window.cd || {};
 
-// Set the dimensions of the canvas / graph
-var margin = {
+cd.chartContainer = d3.select("#chart-container");
+
+cd.toolTips = {
+    indexLine: d3.select("body")
+        .append("div")
+        .attr("class", "tooltip indexTooltip")
+        .style("opacity", 0)
+        .html('<i class="fa fa-times"></i> <br/><a href="#">Informazioni generiche per anno <span class="year"></span> </a> <br/><a href="#">Informazioni specifiche <span class="status"></span> per anno <span class="year"></span> </a> <br/><a href="#">Informazioni generiche <span class="status"></span> </a>'),
+    facoltaLine: d3.select("body")
+        .append("div")
+        .attr("class", "tooltip facoltaTooltip")
+        .style("opacity", 0)
+        .html('<i class="fa fa-times"></i> <br/><a href="#">Informazioni specifiche <span class="status"></span> per anno <span class="year"></span> </a> <br/><a href="#">Informazioni generiche <span class="status"></span> </a>')
+};
+
+cd.margin = {
     top: 30,
     right: 20,
     bottom: 30,
     left: 50
 };
 
-var width = 900 - margin.left - margin.right;
-
-var height = 600 - margin.top - margin.bottom;
-
-var tooltip = d3.select("body")
-    .append("div")
-    .attr("class", "tooltip")
-    .style("opacity", 0)
-    .html('<i class="fa fa-times"></i> <br/><a href="#">Informazioni generiche per anno <span class="year"></span> </a> <br/><a href="#">Informazioni specifiche <span class="status"></span> per anno <span class="year"></span> </a> <br/><a href="#">Informazioni generiche <span class="status"></span> </a>');
+cd.width = 900 - cd.margin.left - cd.margin.right;
+cd.height = 600 - cd.margin.top - cd.margin.bottom;
 
 
-var cd = window.cd || {};
+/**
+ *
+ * @param lines
+ * @returns {number}
+ */
+cd.getMaxLinesY = function (lines) {
+
+    var yMaxes = [];
+
+    for (var key in lines) {
+
+        var line = lines[key];
+
+        var yMax = d3.max(line, function (d) {
+            return parseFloat(d.y);
+        });
+
+        yMaxes.push(yMax);
+    }
+
+    console.log(yMaxes);
+
+    var yMax = d3.max(yMaxes, function (d) {
+        return parseFloat(d);
+    });
+
+    console.log(yMax);
+
+    return yMax;
+};
 
 /**
  * Fetch lines from csv
@@ -41,10 +77,11 @@ cd.fetchLines = function (data) {
                     x: x,
                     y: field
                 };
-                if (typeof lines[key] === 'undefined') {
-                    lines[key] = [];
+                var slug = key.replace(/ /g, "_");
+                if (typeof lines[slug] === 'undefined') {
+                    lines[slug] = [];
                 }
-                lines[key].push(point);
+                lines[slug].push(point);
             }
             i++;
         }
@@ -53,51 +90,38 @@ cd.fetchLines = function (data) {
 };
 
 
+cd.lineChartData = {
+    x: d3.scale.linear().range([0, cd.width]),
+    y: d3.scale.linear().range([cd.height, 0]),
+};
+
+cd.lineChartData.xAxis = d3.svg.axis().scale(cd.lineChartData.x).orient("bottom").tickFormat(d3.format("d")).tickSubdivide(0);
+cd.lineChartData.yAxis = d3.svg.axis().scale(cd.lineChartData.y).orient("left").ticks(20);
+
+cd.lineChartData.drawLine = d3.svg.line()
+    .x(function (d) {
+        var v = cd.lineChartData.x(d.x);
+        return v;
+    })
+    .y(function (d) {
+        return cd.lineChartData.y(d.y);
+    });
 
 
 cd.openOccupazioneNonStoricoGraph = function () {
 
-    var x = d3.scale
-        .linear()
-        .range([0, width]);
+    cd.chartContainer.html("");
 
-    var y = d3.scale
-        .linear()
-        .range([height, 0]);
-
-    var xAxis = d3
-        .svg
-        .axis()
-        .scale(x)
-        .orient("bottom")
-        .tickFormat(d3.format("d"))
-        .tickSubdivide(0);
-
-    var yAxis = d3
-        .svg
-        .axis()
-        .scale(y)
-        .orient("left").ticks(20);
-
-    var drawLine = d3.svg
-        .line()
-        .x(function (d) {
-            return x(d.x);
-        })
-        .y(function (d) {
-            return y(d.y);
-        });
-
-    var svg = chartContainer
+    var svg = cd.chartContainer
         .append("svg")
-        .attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + margin.bottom)
+        .attr("width", cd.width + cd.margin.left + cd.margin.right)
+        .attr("height", cd.height + cd.margin.top + cd.margin.bottom)
         .append("g")
-        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+        .attr("transform", "translate(" + cd.margin.left + "," + cd.margin.top + ")");
 
     d3.csv("data/occupazione_non.csv", function (error, data) {
 
-        x.domain([
+        cd.lineChartData.x.domain([
             d3.min(data, function (d) {
                 return d.date;
             }),
@@ -106,7 +130,7 @@ cd.openOccupazioneNonStoricoGraph = function () {
             })
         ]);
 
-        y.domain([0, 100]);
+        cd.lineChartData.y.domain([0, 100]);
 
         var lines = cd.fetchLines(data);
 
@@ -116,7 +140,7 @@ cd.openOccupazioneNonStoricoGraph = function () {
 
             svg.append("path")
                 .attr("class", "line " + key)
-                .attr("d", drawLine(line));
+                .attr("d", cd.lineChartData.drawLine(line));
 
 
             svg.selectAll("dot")
@@ -126,20 +150,20 @@ cd.openOccupazioneNonStoricoGraph = function () {
                 .attr("class", "circle " + key)
                 .attr("r", 5)
                 .attr("cx", function (d) {
-                    return x(d.x);
+                    return cd.lineChartData.x(d.x);
                 })
                 .attr("cy", function (d) {
-                    return y(d.y);
+                    return cd.lineChartData.y(d.y);
                 })
                 .on("click", function (d) {
                     console.log(d);
-                    tooltip.transition()
+                    cd.toolTips.indexLine.transition()
                         .duration(200)
                         .style("opacity", .9)
                         .style("left", (d3.event.pageX) + "px")
                         .style("top", (d3.event.pageY) + "px");
-                    tooltip.selectAll(".year").text(d.x);
-                    tooltip.selectAll(".status").text(key);
+                    cd.toolTips.indexLine.selectAll(".year").text(d.x);
+                    cd.toolTips.indexLine.selectAll(".status").text(key);
                 })
                 .on("mousehover", function (d) {
                     var dot = d3.select(this);
@@ -153,17 +177,96 @@ cd.openOccupazioneNonStoricoGraph = function () {
 
         svg.append("g")
             .attr("class", "x axis")
-            .attr("transform", "translate(0," + height + ")")
-            .call(xAxis);
+            .attr("transform", "translate(0," + cd.height + ")")
+            .call(cd.lineChartData.xAxis);
 
         svg.append("g")
             .attr("class", "y axis")
-            .call(yAxis);
+            .call(cd.lineChartData.yAxis);
     });
 };
 
-cd.openOccupazioneMotivazioneStoricoGraph = function () {
+cd.openOccupazioneFacoltaStoricoGraph = function () {
 
+    cd.chartContainer.html("");
+
+    var svg = cd.chartContainer
+        .append("svg")
+        .attr("width", cd.width + cd.margin.left + cd.margin.right)
+        .attr("height", cd.height + cd.margin.top + cd.margin.bottom)
+        .append("g")
+        .attr("transform", "translate(" + cd.margin.left + "," + cd.margin.top + ")");
+
+    d3.csv("data/occupazione_facolta.csv", function (error, data) {
+
+        cd.lineChartData.x.domain([
+            d3.min(data, function (d) {
+                return d.date;
+            }),
+            d3.max(data, function (d) {
+                return d.date;
+            })
+        ]);
+
+        cd.lineChartData.y.domain([
+            0, 100
+        ]);
+
+        var lines = cd.fetchLines(data);
+
+        cd.lineChartData.y.domain([
+            0, cd.getMaxLinesY(lines)
+        ]);
+
+        for (var key in lines) {
+
+            var line = lines[key];
+
+            svg.append("path")
+                .attr("class", "line " + key)
+                .attr("d", cd.lineChartData.drawLine(line));
+
+
+            svg.selectAll("dot")
+                .data(line)
+                .enter()
+                .append("circle")
+                .attr("class", "circle " + key)
+                .attr("r", 5)
+                .attr("cx", function (d) {
+                    return cd.lineChartData.x(d.x);
+                })
+                .attr("cy", function (d) {
+                    return cd.lineChartData.y(d.y);
+                })
+                .on("click", function (d) {
+                    cd.toolTips.facoltaLine.transition()
+                        .duration(200)
+                        .style("opacity", .9)
+                        .style("left", (d3.event.pageX) + "px")
+                        .style("top", (d3.event.pageY) + "px");
+                    cd.toolTips.facoltaLine.selectAll(".year").text(d.x);
+                    cd.toolTips.facoltaLine.selectAll(".status").text(key);
+                })
+                .on("mousehover", function (d) {
+                    var dot = d3.select(this);
+                    dot.classed("hover", true);
+                })
+                .on("mouseout", function (d) {
+                    var dot = d3.select(this);
+                    dot.classed("hover", false);
+                });
+        }
+
+        svg.append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(0," + cd.height + ")")
+            .call(cd.lineChartData.xAxis);
+
+        svg.append("g")
+            .attr("class", "y axis")
+            .call(cd.lineChartData.yAxis);
+    });
 
 };
 
@@ -179,3 +282,6 @@ cd.openDisoccupazioneStoricoGraph = function () {
 
 cd.openOccupazioneNonStoricoGraph();
 
+// setTimeout(function () {
+cd.openOccupazioneFacoltaStoricoGraph();
+// }, 2000);
