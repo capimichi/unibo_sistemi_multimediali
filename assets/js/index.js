@@ -104,6 +104,24 @@ cd.fetchLines = function (data) {
     return lines;
 };
 
+cd.changeInfoControl = function (rows) {
+
+    cd.infoContainer.html("");
+
+    var ul = cd.infoContainer.append("ul");
+
+    rows.forEach(function (row) {
+
+        var li = ul.append("li");
+
+        li.text(row.text);
+
+        var btn = li.append("button");
+
+        btn.text("Mostra")
+            .on('click', row.callback)
+    });
+};
 
 cd.lineChartData = {
     x: d3.scale.linear().range([0, cd.width]),
@@ -147,6 +165,8 @@ cd.lineChartData.drawLineChart = function (csvPath, clickCallback) {
 
         var lines = cd.fetchLines(data);
 
+        console.log(lines);
+
         cd.lineChartData.y.domain([
             cd.getMinLinesY(lines), cd.getMaxLinesY(lines)
         ]);
@@ -171,14 +191,6 @@ cd.lineChartData.drawLineChart = function (csvPath, clickCallback) {
                 .attr("cy", function (d) {
                     return cd.lineChartData.y(d.y);
                 });
-            // .on("click", function (d) {
-            //     console.log(key);
-            //     return clickCallback({
-            //         'year': d.x,
-            //         'label': key,
-            //         'value': d.y
-            //     })
-            // });
         }
 
         svg.selectAll('circle')
@@ -206,21 +218,46 @@ cd.lineChartData.drawLineChart = function (csvPath, clickCallback) {
 
 cd.openOccupazioneNonStoricoGraph = function () {
 
+    cd.changeInfoControl([]);
+
     cd.lineChartData.drawLineChart('data/occupazione_non.csv', function (d) {
 
         if (d.circle.classed("occupati")) {
 
-            var html = "<ul><li>Informazioni storico facoltà &nbsp; <button>Mostra</button></li><li>Informazioni storico tempistiche &nbsp; <button>Mostra</button></li><li>Informazioni \"occupati / non\" anno {anno} &nbsp; <button>Mostra</button></li></ul>";
+            var rows = [
+                {
+                    text: 'Informazioni storico facoltà',
+                    callback: cd.openOccupazioneFacoltaStoricoGraph
+                },
+                {
+                    text: 'Informazioni storico tempistiche',
+                    callback: cd.openOccupazioneTempisticheStoricoGraph
+                },
+                {
+                    text: 'Informazioni \"occupati / non\" anno ' + d.x,
+                    callback: null
+                }
+            ];
+
+
         }
 
         if (d.circle.classed("non_occupati")) {
 
-            var html = "<ul><li>Informazioni storico disoccupazione &nbsp; <button>Mostra</button></li><li>Informazioni \"occupati / non\" anno {anno} &nbsp; <button>Mostra</button></li></ul>";
+            var rows = [
+                {
+                    text: 'Informazioni storico disoccupazione',
+                    callback: cd.openDisoccupazioneStoricoGraph
+                },
+                {
+                    text: 'Informazioni \"occupati / non\" anno ' + d.x,
+                    callback: null
+                }
+            ];
+
         }
 
-        html = html.replace(/{anno}/g, d.x);
-
-        cd.infoContainer.html(html);
+        cd.changeInfoControl(rows);
 
     });
 
@@ -228,17 +265,85 @@ cd.openOccupazioneNonStoricoGraph = function () {
 
 cd.openOccupazioneFacoltaStoricoGraph = function () {
 
-    cd.lineChartData.drawLineChart('data/occupazione_facolta.csv');
+    cd.changeInfoControl([
+        {
+            text: 'Informazioni storico \"occupati / non\"',
+            callback: cd.openOccupazioneNonStoricoGraph
+        }
+    ]);
+
+    cd.lineChartData.drawLineChart('data/occupazione_facolta.csv', function (d) {
+
+        var rows = [
+            {
+                text: 'Informazioni facoltà anno ' + d.x,
+                callback: null
+            },
+            {
+                text: 'Informazioni storico \"occupati / non\"',
+                callback: cd.openOccupazioneNonStoricoGraph
+            }
+        ];
+
+        cd.changeInfoControl(rows);
+
+    });
 
 };
 
 cd.openOccupazioneTempisticheStoricoGraph = function () {
 
+    cd.changeInfoControl([
+        {
+            text: 'Informazioni storico \"occupati / non\"',
+            callback: cd.openOccupazioneNonStoricoGraph
+        }
+    ]);
+
+    cd.lineChartData.drawLineChart('data/occupazione_tempistiche.csv', function (d) {
+
+        var rows = [
+            {
+                text: 'Informazioni tempistiche anno ' + d.x,
+                callback: null
+            },
+            {
+                text: 'Informazioni storico \"occupati / non\"',
+                callback: cd.openOccupazioneNonStoricoGraph
+            }
+        ];
+
+        cd.changeInfoControl(rows);
+
+    });
 
 };
 
 cd.openDisoccupazioneStoricoGraph = function () {
 
+    cd.changeInfoControl([
+        {
+            text: 'Informazioni storico \"occupati / non\"',
+            callback: cd.openOccupazioneNonStoricoGraph
+        }
+    ]);
+
+    cd.lineChartData.drawLineChart('data/disoccupazione.csv', function (d) {
+
+        var rows = [
+            {
+                text: 'Informazioni disoccupazione anno ' + d.x,
+                callback: null
+            },
+            {
+                text: 'Informazioni storico \"occupati / non\"',
+                callback: cd.openOccupazioneNonStoricoGraph
+            }
+        ];
+
+        cd.changeInfoControl(rows);
+
+    });
 
 };
 

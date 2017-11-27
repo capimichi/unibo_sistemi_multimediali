@@ -35,19 +35,11 @@ path {
     shape-rendering: crispEdges;
 }
 
-path.occupati {
+path.occupati, path.life_physical_and_social_science_technicians, path.che_proseguono_gli_studi {
     stroke: #F2693A;
 }
 
-path.non_occupati {
-    stroke: #F2C23A;
-}
-
-path.life_physical_and_social_science_technicians {
-    stroke: #F2693A;
-}
-
-path.social_scientists_and_related_workers {
+path.non_occupati, path.social_scientists_and_related_workers, path.che_non_trovano {
     stroke: #F2C23A;
 }
 
@@ -83,12 +75,12 @@ path.computer_occupations {
     stroke: #464646;
 }
 
-.circle.occupati {
+.circle.occupati, .circle.che_proseguono_gli_studi {
     stroke: #D84512;
     fill: #D84512;
 }
 
-.circle.non_occupati {
+.circle.non_occupati, .circle.che_non_trovano {
     stroke: #D88012;
     fill: #D88012;
 }
