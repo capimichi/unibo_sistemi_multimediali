@@ -8,9 +8,18 @@ body {
 #chart-container {
     width: 900px;
     height: 600px;
-    margin: 100px auto 0;
+    margin: 20px auto 0;
     background-color: #fff;
     box-shadow: 0 2px 1px rgba(0, 0, 0, .2);
+}
+
+#info-container {
+    width: 900px;
+    height: 150px;
+    margin: 20px auto;
+    background-color: #fff;
+    box-shadow: 0 2px 1px rgba(0, 0, 0, .2);
+    padding: 20px;
 }
 
 path {

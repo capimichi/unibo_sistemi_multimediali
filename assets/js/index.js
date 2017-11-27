@@ -2,18 +2,7 @@ var cd = window.cd || {};
 
 cd.chartContainer = d3.select("#chart-container");
 
-cd.toolTips = {
-    indexLine: d3.select("body")
-        .append("div")
-        .attr("class", "tooltip indexTooltip")
-        .style("opacity", 0)
-        .html('<i class="fa fa-times"></i> <br/><a href="#">Informazioni generiche per anno <span class="year"></span> </a> <br/><a href="#">Informazioni specifiche <span class="status"></span> per anno <span class="year"></span> </a> <br/><a href="#">Informazioni generiche <span class="status"></span> </a>'),
-    facoltaLine: d3.select("body")
-        .append("div")
-        .attr("class", "tooltip facoltaTooltip")
-        .style("opacity", 0)
-        .html('<i class="fa fa-times"></i> <br/><a href="#">Informazioni specifiche <span class="status"></span> per anno <span class="year"></span> </a> <br/><a href="#">Informazioni generiche <span class="status"></span> </a>')
-};
+cd.infoContainer = d3.select("#info");
 
 cd.margin = {
     top: 30,
@@ -46,8 +35,6 @@ cd.getMaxLinesY = function (lines) {
         yMaxes.push(yMax);
     }
 
-    console.log(yMaxes);
-
     var yMax = d3.max(yMaxes, function (d) {
         return parseFloat(d);
     });
@@ -55,6 +42,34 @@ cd.getMaxLinesY = function (lines) {
     console.log(yMax);
 
     return yMax;
+};
+
+/**
+ *
+ * @param lines
+ * @returns {number}
+ */
+cd.getMinLinesY = function (lines) {
+
+    var yMins = [];
+
+    for (var key in lines) {
+
+        var line = lines[key];
+
+        var yMin = d3.min(line, function (d) {
+            return parseFloat(d.y);
+        });
+
+        yMins.push(yMin);
+    }
+
+    var yMin = d3.min(yMins, function (d) {
+        return parseFloat(d);
+    });
+
+
+    return yMin;
 };
 
 /**
@@ -108,18 +123,18 @@ cd.lineChartData.drawLine = d3.svg.line()
     });
 
 
-cd.openOccupazioneNonStoricoGraph = function () {
+cd.lineChartData.drawLineChart = function (csvPath, clickCallback) {
 
-    cd.chartContainer.html("");
+    d3.csv(csvPath, function (error, data) {
 
-    var svg = cd.chartContainer
-        .append("svg")
-        .attr("width", cd.width + cd.margin.left + cd.margin.right)
-        .attr("height", cd.height + cd.margin.top + cd.margin.bottom)
-        .append("g")
-        .attr("transform", "translate(" + cd.margin.left + "," + cd.margin.top + ")");
+        cd.chartContainer.html("");
 
-    d3.csv("data/occupazione_non.csv", function (error, data) {
+        var svg = cd.chartContainer
+            .append("svg")
+            .attr("width", cd.width + cd.margin.left + cd.margin.right)
+            .attr("height", cd.height + cd.margin.top + cd.margin.bottom)
+            .append("g")
+            .attr("transform", "translate(" + cd.margin.left + "," + cd.margin.top + ")");
 
         cd.lineChartData.x.domain([
             d3.min(data, function (d) {
@@ -130,9 +145,11 @@ cd.openOccupazioneNonStoricoGraph = function () {
             })
         ]);
 
-        cd.lineChartData.y.domain([0, 100]);
-
         var lines = cd.fetchLines(data);
+
+        cd.lineChartData.y.domain([
+            cd.getMinLinesY(lines), cd.getMaxLinesY(lines)
+        ]);
 
         for (var key in lines) {
 
@@ -141,7 +158,6 @@ cd.openOccupazioneNonStoricoGraph = function () {
             svg.append("path")
                 .attr("class", "line " + key)
                 .attr("d", cd.lineChartData.drawLine(line));
-
 
             svg.selectAll("dot")
                 .data(line)
@@ -154,26 +170,28 @@ cd.openOccupazioneNonStoricoGraph = function () {
                 })
                 .attr("cy", function (d) {
                     return cd.lineChartData.y(d.y);
-                })
-                .on("click", function (d) {
-                    console.log(d);
-                    cd.toolTips.indexLine.transition()
-                        .duration(200)
-                        .style("opacity", .9)
-                        .style("left", (d3.event.pageX) + "px")
-                        .style("top", (d3.event.pageY) + "px");
-                    cd.toolTips.indexLine.selectAll(".year").text(d.x);
-                    cd.toolTips.indexLine.selectAll(".status").text(key);
-                })
-                .on("mousehover", function (d) {
-                    var dot = d3.select(this);
-                    dot.classed("hover", true);
-                })
-                .on("mouseout", function (d) {
-                    var dot = d3.select(this);
-                    dot.classed("hover", false);
                 });
+            // .on("click", function (d) {
+            //     console.log(key);
+            //     return clickCallback({
+            //         'year': d.x,
+            //         'label': key,
+            //         'value': d.y
+            //     })
+            // });
         }
+
+        svg.selectAll('circle')
+            .on('click', function (d) {
+
+                var t = d3.select(this);
+
+                clickCallback({
+                    circle: t,
+                    x: d.x,
+                    y: d.y
+                });
+            });
 
         svg.append("g")
             .attr("class", "x axis")
@@ -186,87 +204,31 @@ cd.openOccupazioneNonStoricoGraph = function () {
     });
 };
 
-cd.openOccupazioneFacoltaStoricoGraph = function () {
+cd.openOccupazioneNonStoricoGraph = function () {
 
-    cd.chartContainer.html("");
+    cd.lineChartData.drawLineChart('data/occupazione_non.csv', function (d) {
 
-    var svg = cd.chartContainer
-        .append("svg")
-        .attr("width", cd.width + cd.margin.left + cd.margin.right)
-        .attr("height", cd.height + cd.margin.top + cd.margin.bottom)
-        .append("g")
-        .attr("transform", "translate(" + cd.margin.left + "," + cd.margin.top + ")");
+        if (d.circle.classed("occupati")) {
 
-    d3.csv("data/occupazione_facolta.csv", function (error, data) {
-
-        cd.lineChartData.x.domain([
-            d3.min(data, function (d) {
-                return d.date;
-            }),
-            d3.max(data, function (d) {
-                return d.date;
-            })
-        ]);
-
-        cd.lineChartData.y.domain([
-            0, 100
-        ]);
-
-        var lines = cd.fetchLines(data);
-
-        cd.lineChartData.y.domain([
-            0, cd.getMaxLinesY(lines)
-        ]);
-
-        for (var key in lines) {
-
-            var line = lines[key];
-
-            svg.append("path")
-                .attr("class", "line " + key)
-                .attr("d", cd.lineChartData.drawLine(line));
-
-
-            svg.selectAll("dot")
-                .data(line)
-                .enter()
-                .append("circle")
-                .attr("class", "circle " + key)
-                .attr("r", 5)
-                .attr("cx", function (d) {
-                    return cd.lineChartData.x(d.x);
-                })
-                .attr("cy", function (d) {
-                    return cd.lineChartData.y(d.y);
-                })
-                .on("click", function (d) {
-                    cd.toolTips.facoltaLine.transition()
-                        .duration(200)
-                        .style("opacity", .9)
-                        .style("left", (d3.event.pageX) + "px")
-                        .style("top", (d3.event.pageY) + "px");
-                    cd.toolTips.facoltaLine.selectAll(".year").text(d.x);
-                    cd.toolTips.facoltaLine.selectAll(".status").text(key);
-                })
-                .on("mousehover", function (d) {
-                    var dot = d3.select(this);
-                    dot.classed("hover", true);
-                })
-                .on("mouseout", function (d) {
-                    var dot = d3.select(this);
-                    dot.classed("hover", false);
-                });
+            var html = "<ul><li>Informazioni storico facoltà &nbsp; <button>Mostra</button></li><li>Informazioni storico tempistiche &nbsp; <button>Mostra</button></li><li>Informazioni \"occupati / non\" anno {anno} &nbsp; <button>Mostra</button></li></ul>";
         }
 
-        svg.append("g")
-            .attr("class", "x axis")
-            .attr("transform", "translate(0," + cd.height + ")")
-            .call(cd.lineChartData.xAxis);
+        if (d.circle.classed("non_occupati")) {
 
-        svg.append("g")
-            .attr("class", "y axis")
-            .call(cd.lineChartData.yAxis);
+            var html = "<ul><li>Informazioni storico disoccupazione &nbsp; <button>Mostra</button></li><li>Informazioni \"occupati / non\" anno {anno} &nbsp; <button>Mostra</button></li></ul>";
+        }
+
+        html = html.replace(/{anno}/g, d.x);
+
+        cd.infoContainer.html(html);
+
     });
+
+};
+
+cd.openOccupazioneFacoltaStoricoGraph = function () {
+
+    cd.lineChartData.drawLineChart('data/occupazione_facolta.csv');
 
 };
 
@@ -283,5 +245,5 @@ cd.openDisoccupazioneStoricoGraph = function () {
 cd.openOccupazioneNonStoricoGraph();
 
 // setTimeout(function () {
-cd.openOccupazioneFacoltaStoricoGraph();
+//     cd.openOccupazioneFacoltaStoricoGraph();
 // }, 2000);
