@@ -216,6 +216,70 @@ cd.lineChartData.drawLineChart = function (csvPath, clickCallback) {
     });
 };
 
+
+cd.pieChartData = {};
+
+cd.pieChartData.drawPieChart = function (year) {
+    // var svg = d3.select("svg"),
+    //     width = +svg.attr("width"),
+    //     height = +svg.attr("height"),
+    var radius = Math.min(cd.width, cd.height) / 2;
+    //     g = svg.append("g").attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+
+    var color = d3.scale.ordinal(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c", "#ff8c00"]);
+
+    var pie = d3.layout.pie()
+        .sort(null)
+        .value(function (d) {
+            return d.valore;
+        });
+
+    var path = d3.svg.arc()
+        .outerRadius(radius)
+        .innerRadius(0);
+
+    var label = d3.svg.arc()
+        .outerRadius(radius - 80)
+        .innerRadius(radius - 40);
+
+    d3.csv("test/pie_chart/CSV_file.csv", function (d) {
+        d.valore = +d.valore;
+        return d;
+    }, function (error, data) {
+        if (error) throw error;
+
+        cd.chartContainer.html("");
+
+        var svg = cd.chartContainer
+            .append("svg")
+            .attr("width", cd.width + cd.margin.left + cd.margin.right)
+            .attr("height", cd.height + cd.margin.top + cd.margin.bottom)
+            .append("g")
+            .attr("transform", "translate(" + cd.margin.left + "," + cd.margin.top + ")");
+
+        var arc = svg.selectAll(".arc")
+            .data(pie(data))
+            .enter().append("g")
+            .attr("class", "arc");
+
+        arc.append("path")
+            .attr("d", path)
+            .attr("fill", function (d) {
+                console.log(d);
+                return color(d.data.nome);
+            });
+
+        arc.append("text")
+            .attr("transform", function (d) {
+                return "translate(" + label.centroid(d) + ")";
+            })
+            .attr("dy", "0.35em")
+            .text(function (d) {
+                return d.data.nome;
+            });
+    });
+};
+
 cd.openOccupazioneNonStoricoGraph = function () {
 
     cd.changeInfoControl([]);
@@ -333,7 +397,9 @@ cd.openDisoccupazioneStoricoGraph = function () {
         var rows = [
             {
                 text: 'Informazioni disoccupazione anno ' + d.x,
-                callback: null
+                callback: function (a) {
+                    cd.openDisoccupazioneAnnoGraph(d.x);
+                }
             },
             {
                 text: 'Informazioni storico \"occupati / non\"',
@@ -345,6 +411,10 @@ cd.openDisoccupazioneStoricoGraph = function () {
 
     });
 
+};
+
+cd.openDisoccupazioneAnnoGraph = function (year) {
+    cd.pieChartData.drawPieChart(year);
 };
 
 cd.openOccupazioneNonStoricoGraph();
