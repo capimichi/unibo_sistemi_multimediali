@@ -2,6 +2,8 @@ var cd = window.cd || {};
 
 cd.chartContainer = d3.select("#chart-container");
 
+cd.legendContainer = d3.select("#legend");
+
 cd.infoContainer = d3.select("#info");
 
 cd.margin = {
@@ -185,11 +187,26 @@ cd.lineChartData.drawLineChart = function (csvPath, clickCallback) {
             cd.getMinLinesY(lines), cd.getMaxLinesY(lines)
         ]);
 
+        cd.legendContainer.html('');
+
+        var colorIndex = 0;
+
         for (var key in lines) {
+
+            var color = cd.colors[colorIndex];
+
+            colorIndex++;
 
             var line = lines[key];
 
+            cd.legendContainer
+                .append('li')
+                .text(key.replace(/_/g, ' '))
+                .style('color', color)
+            ;
+
             svg.append("path")
+                .style('stroke', color)
                 .attr("class", "line " + key)
                 .attr("d", cd.lineChartData.drawLine(line));
 
@@ -197,6 +214,8 @@ cd.lineChartData.drawLineChart = function (csvPath, clickCallback) {
                 .data(line)
                 .enter()
                 .append("circle")
+                .style('stroke', color)
+                .style('fill', color)
                 .attr("class", "circle " + key)
                 .attr("r", 5)
                 .attr("cx", function (d) {

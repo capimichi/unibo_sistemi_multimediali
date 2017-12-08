@@ -22,6 +22,20 @@ body {
     padding: 20px;
 }
 
+#legend-container {
+    width: 900px;
+    /*height: 150px;*/
+    margin: 20px auto;
+    background-color: #fff;
+    box-shadow: 0 2px 1px rgba(0, 0, 0, .2);
+    padding: 20px;
+}
+
+#legend-container ul li {
+    text-transform: capitalize;
+    border-right: 1px solid #464646;
+}
+
 path {
     stroke-width: 2;
     fill: none;
@@ -35,99 +49,8 @@ path {
     shape-rendering: crispEdges;
 }
 
-path.occupati, path.life_physical_and_social_science_technicians, path.che_proseguono_gli_studi {
-    stroke: #F2693A;
-}
-
-path.non_occupati, path.social_scientists_and_related_workers, path.che_non_trovano {
-    stroke: #F2C23A;
-}
-
-path.physical_scientists {
-    stroke: #6133A5;
-}
-
-path.life_scientists {
-    stroke: #2C6F9B;
-}
-
-path.drafters_engineering_technicians_and_mapping_technicians {
-    stroke: #28A96B;
-}
-
-path.engineers {
-    stroke: #85DA34;
-}
-
-path.architects_surveyors_and_cartographers {
-    stroke: #D6336A;
-}
-
-path.mathematical_science {
-    stroke: #F3A139;
-}
-
-path.computer_occupations {
-    stroke: #96279E;
-}
-
 .axis {
     stroke: #464646;
-}
-
-.circle.occupati, .circle.che_proseguono_gli_studi {
-    stroke: #D84512;
-    fill: #D84512;
-}
-
-.circle.non_occupati, .circle.che_non_trovano {
-    stroke: #D88012;
-    fill: #D88012;
-}
-
-.circle.life_physical_and_social_science_technicians {
-    stroke: #F2693A;
-    fill: #F2693A;
-}
-
-.circle.social_scientists_and_related_workers {
-    stroke: #F2C23A;
-    fill: #F2C23A;
-}
-
-.circle.physical_scientists {
-    stroke: #6133A5;
-    fill: #6133A5;
-}
-
-.circle.life_scientists {
-    stroke: #2C6F9B;
-    fill: #2C6F9B;
-}
-
-.circle.drafters_engineering_technicians_and_mapping_technicians {
-    stroke: #28A96B;
-    fill: #28A96B;
-}
-
-.circle.engineers {
-    stroke: #85DA34;
-    fill: #85DA34;
-}
-
-.circle.architects_surveyors_and_cartographers {
-    stroke: #D6336A;
-    fill: #D6336A;
-}
-
-.circle.mathematical_science {
-    stroke: #F3A139;
-    fill: #F3A139;
-}
-
-.circle.computer_occupations {
-    stroke: #96279E;
-    fill: #96279E;
 }
 
 .circle.hover {
