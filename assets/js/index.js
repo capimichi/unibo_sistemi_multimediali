@@ -13,7 +13,8 @@ cd.margin = {
     left: 50
 };
 
-cd.width = 900 - cd.margin.left - cd.margin.right;
+cd.width = d3.select('#legend-container').node().getBoundingClientRect().width - cd.margin.left - cd.margin.right;
+
 cd.height = 600 - cd.margin.top - cd.margin.bottom;
 
 cd.colors = [
@@ -349,7 +350,9 @@ cd.openOccupazioneNonStoricoGraph = function () {
                 },
                 {
                     text: 'Informazioni \"occupati / non\" anno ' + d.x,
-                    callback: null
+                    callback: function () {
+                        cd.openOccupazioneNonAnnoGraph(d.x);
+                    }
                 }
             ];
 
@@ -365,7 +368,9 @@ cd.openOccupazioneNonStoricoGraph = function () {
                 },
                 {
                     text: 'Informazioni \"occupati / non\" anno ' + d.x,
-                    callback: null
+                    callback: function () {
+                        cd.openOccupazioneNonAnnoGraph(d.x);
+                    }
                 }
             ];
 
@@ -421,7 +426,9 @@ cd.openOccupazioneTempisticheStoricoGraph = function () {
         var rows = [
             {
                 text: 'Informazioni tempistiche anno ' + d.x,
-                callback: null
+                callback: function () {
+                    cd.openOccupazioneTempisticheAnnoGraph(d.x);
+                }
             },
             {
                 text: 'Informazioni storico \"occupati / non\"',
@@ -463,6 +470,19 @@ cd.openDisoccupazioneStoricoGraph = function () {
 
     });
 
+};
+
+cd.openOccupazioneNonAnnoGraph = function (year) {
+    cd.changeInfoControl([
+        {
+            text: 'Informazioni storico \"occupati / non\"',
+            callback: cd.openOccupazioneNonStoricoGraph
+        }
+    ]);
+
+    cd.pieChartData.drawPieChart(year, 'data/occupazione_non.csv', function (d) {
+        cd.changeInfoControl([]);
+    });
 };
 
 cd.openDisoccupazioneAnnoGraph = function (year) {

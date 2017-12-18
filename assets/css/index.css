@@ -6,24 +6,36 @@ body {
 }
 
 #chart-container {
-    width: 900px;
     height: 600px;
     margin: 20px auto 0;
     background-color: #fff;
     box-shadow: 0 2px 1px rgba(0, 0, 0, .2);
+    position: relative;
 }
 
 #info-container {
-    width: 900px;
-    height: 150px;
+    min-height: 150px;
     margin: 20px auto;
     background-color: #fff;
     box-shadow: 0 2px 1px rgba(0, 0, 0, .2);
     padding: 20px;
 }
 
+#info-container ul {
+    margin: 0;
+    padding: 0;
+    list-style-type: none;
+}
+
+#info-container ul li {
+    padding: 5px 0;
+}
+
+#info-container ul li button {
+    margin-left: 5px;
+}
+
 #legend-container {
-    width: 900px;
     /*height: 150px;*/
     margin: 20px auto;
     background-color: #fff;
