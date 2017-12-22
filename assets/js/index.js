@@ -251,6 +251,8 @@ cd.pieChartData = {};
 
 cd.pieChartData.drawPieChart = function (year, csvPath, clickCallback) {
 
+    cd.legendContainer.html('');
+
     d3.csv(csvPath, function (error, data) {
 
         var radius = 200;
@@ -337,6 +339,8 @@ cd.histogramChartData.yAxis = d3.svg.axis().scale(cd.histogramChartData.y).orien
 
 cd.histogramChartData.drawHistogramChart = function (csvPath, clickCallback) {
 
+    cd.legendContainer.html('');
+
     cd.chartContainer.html("");
 
     d3.csv(csvPath, function (error, data) {
@@ -365,7 +369,7 @@ cd.histogramChartData.drawHistogramChart = function (csvPath, clickCallback) {
             .orient("left")
             .tickFormat(d3.format(".2s"));
 
-        dataset = data;
+        var dataset = data;
 
         var options = d3.keys(dataset[0]).filter(function (key) {
             return key !== "date";
@@ -405,6 +409,8 @@ cd.histogramChartData.drawHistogramChart = function (csvPath, clickCallback) {
                 return "translate(" + x0(d.date) + ",0)";
             });
 
+        var legendColors = {};
+
         bar.selectAll("rect")
             .data(function (d) {
 
@@ -433,8 +439,22 @@ cd.histogramChartData.drawHistogramChart = function (csvPath, clickCallback) {
                 return cd.height - y(d.value);
             })
             .style("fill", function (d, index) {
+
+                legendColors[d.name] = cd.colors[index];
                 return cd.colors[index];
             });
+
+
+        for (var key in legendColors) {
+
+            var color = legendColors[key];
+
+            cd.legendContainer
+                .append('li')
+                .text(key.replace(/_/g, ' '))
+                .style('color', color)
+            ;
+        }
 
         bar.selectAll("rect")
             .on('click', function (d) {
