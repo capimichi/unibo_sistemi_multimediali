@@ -45,7 +45,7 @@ body {
 
 #legend-container ul li {
     text-transform: capitalize;
-    border-right: 1px solid #464646;
+    color: #ffffff;
 }
 
 path {

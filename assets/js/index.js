@@ -199,7 +199,7 @@ cd.lineChartData.drawLineChart = function (csvPath, clickCallback) {
             cd.legendContainer
                 .append('li')
                 .text(key.replace(/_/g, ' '))
-                .style('color', color)
+                .style('background-color', color)
             ;
 
             svg.append("path")
@@ -283,6 +283,8 @@ cd.pieChartData.drawPieChart = function (year, csvPath, clickCallback) {
 
         var i = 0;
 
+        cd.legendContainer.html('');
+
         for (var key in lines) {
 
             var line = lines[key];
@@ -300,7 +302,17 @@ cd.pieChartData.drawPieChart = function (year, csvPath, clickCallback) {
                 value: value,
                 color: cd.colors[i++]
             });
+
         }
+
+        dataSet.forEach(function (item) {
+            console.log(item);
+            cd.legendContainer
+                .append('li')
+                .text(item.legend.replace(/_/g, ' '))
+                .style('background-color', item.color)
+            ;
+        });
 
         var g = svg.selectAll(".fan")
             .data(pie(dataSet))
@@ -314,14 +326,14 @@ cd.pieChartData.drawPieChart = function (year, csvPath, clickCallback) {
                 return d.data.color;
             });
 
-        g.append("text")
-            .attr("transform", function (d) {
-                return "translate(" + arc.centroid(d) + ")";
-            })
-            .style("text-anchor", "middle")
-            .text(function (d) {
-                return d.data.legend;
-            });
+        // g.append("text")
+        //     .attr("transform", function (d) {
+        //         return "translate(" + arc.centroid(d) + ")";
+        //     })
+        //     .style("text-anchor", "middle")
+        //     .text(function (d) {
+        //         return d.data.legend;
+        //     });
     });
 };
 
@@ -452,7 +464,7 @@ cd.histogramChartData.drawHistogramChart = function (csvPath, clickCallback) {
             cd.legendContainer
                 .append('li')
                 .text(key.replace(/_/g, ' '))
-                .style('color', color)
+                .style('background-color', color)
             ;
         }
 
